@@ -1,0 +1,60 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build",
+            "type": "shell",
+            "command": "make -j$(nproc)",
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Run QMake",
+            "type": "shell",
+            "command": "qmake ../src.pro CONFIG+=${input:buildType}",
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            }
+        },
+        {
+            "label": "Run QMake and Build",
+            "type": "shell",
+            "command": "qmake ../src.pro CONFIG+=${input:buildType} && make -j$(nproc)",
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+            "group": {
+                "kind": "build",
+            }
+        },
+        {
+            "label": "Clean Build",
+            "type": "shell",
+            "command": "rm -rf * && qmake ../src.pro CONFIG+=${input:buildType} && make -j$(nproc)",
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+            "group": {
+                "kind": "build",
+            }
+        }
+    ],
+    "inputs": [
+        {
+            "type": "pickString",
+            "id": "buildType",
+            "description": "The build type to use",
+            "options": [
+                "debug",
+                "release"
+            ],
+            "default": "debug"
+        }
+    ]
+}

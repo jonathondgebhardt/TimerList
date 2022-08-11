@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name:": "Linux",
+            "compilerPath": "/usr/bin/gcc",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/usr/include/qt/**"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}"
+                ]
+            },
+            "intelliSenseMode": "linux-gcc-x64",
+            "cStandard": "c17",
+            "cppStandard": "c++14"
+        }
+    ],
+    "version": 4
+}
