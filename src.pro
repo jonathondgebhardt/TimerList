@@ -13,7 +13,8 @@ HEADERS += \
     TimerListModel.h \
     TimerListView.h \
     TimerListWidget.h \
-    TimerPlayer.h
+    TimerPlayer.h \
+    Utilities.h
 
 SOURCES += \
     FormMain.cpp \
@@ -22,4 +23,5 @@ SOURCES += \
     TimerListModel.cpp \
     TimerListView.cpp \
     TimerListWidget.cpp \
-    TimerPlayer.cpp
+    TimerPlayer.cpp \
+    Utilities.cpp
