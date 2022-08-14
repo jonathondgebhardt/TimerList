@@ -35,6 +35,7 @@ tl::TimerListWidget::TimerListWidget(QWidget* parent)
   layout->addLayout(buttonLayout);
 
   this->connect(this->btnPlayPause, &QPushButton::clicked, this, &tl::TimerListWidget::playPause);
+  this->connect(this->btnStop, &QPushButton::clicked, this, &tl::TimerListWidget::stop);
   this->connect(this->chkLoop, &QCheckBox::stateChanged, this, &tl::TimerListWidget::loopChanged);
   this->connect(this->btnAdd, &QPushButton::clicked, this, &tl::TimerListWidget::addTimer);
   this->connect(this->btnRemove, &QPushButton::clicked, this, &tl::TimerListWidget::removeTimer);
