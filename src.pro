@@ -3,8 +3,9 @@ QT += core gui widgets
 TARGET = TimerList
 TEMPLATE = app
 
-QT_QPA_PLATFORM=wayland
-
+QT_QPA_PLATFORM = wayland
+RESOURCES += qdarkstyle/dark/style.qrc
+RESOURCES += qdarkstyle/light/style.qrc
 DESTDIR = bin
 
 HEADERS += \
