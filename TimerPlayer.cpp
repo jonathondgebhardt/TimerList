@@ -1,19 +1,22 @@
 #include "TimerPlayer.h"
 
+#include <iostream>
+
 tl::TimerPlayer::TimerPlayer(QObject* parent) : QObject(parent)
 {
+  this->connect(&this->timer, &tl::Timer::expired, this, &tl::TimerPlayer::startNextTimer);
 }
 
 int tl::TimerPlayer::size() const
 {
-  return static_cast<int>(this->timers.size());
+  return static_cast<int>(this->items.size());
 }
 
-tl::Timer* tl::TimerPlayer::getTimer(int x) const
+tl::TimerPlayer::Item* tl::TimerPlayer::getItem(int x) const
 {
   if(x >= 0 && x < this->size())
   {
-    return this->timers[x].get();
+    return this->items[x].get();
   }
 
   return nullptr;
@@ -21,47 +24,38 @@ tl::Timer* tl::TimerPlayer::getTimer(int x) const
 
 bool tl::TimerPlayer::getIsPaused() const
 {
-  if(const auto timer = this->getTimer(this->currentTimerIndex))
-  {
-    return timer->getIsPaused();
-  }
 
   return false;
 }
 
 void tl::TimerPlayer::play()
 {
-  if(this->timers.empty() == false)
+  if(this->items.empty() == false)
   {
-    const auto firstTimer = this->timers.front().get();
-    firstTimer->start();
+    std::cout << "TimerPlayer: Starting timer " << this->currentTimerIndex << " with duration "
+              << this->items[this->currentTimerIndex]->duration << "\n";
 
-    this->connect(firstTimer, &tl::Timer::expired, this, &tl::TimerPlayer::startNextTimer);
-
-    this->timerStarted(this->currentTimerIndex);
+    this->timer.setDuration(this->items[this->currentTimerIndex]->duration);
+    this->timer.start();
   }
 }
 
 void tl::TimerPlayer::pause()
 {
-  if(const auto timer = this->getTimer(this->currentTimerIndex))
-  {
-    timer->pause();
-  }
+  this->timer.pause();
 }
 
 void tl::TimerPlayer::stop()
 {
+  this->timer.pause();
 }
 
 void tl::TimerPlayer::addTimer()
 {
-  this->timers.push_back(std::make_unique<tl::Timer>());
 }
 
-void tl::TimerPlayer::removeTimer(int x)
+void tl::TimerPlayer::removeTimer(int)
 {
-  this->timers.erase(std::begin(this->timers) + x);
 }
 
 void tl::TimerPlayer::setLoop(bool x)
@@ -71,27 +65,27 @@ void tl::TimerPlayer::setLoop(bool x)
 
 void tl::TimerPlayer::startNextTimer()
 {
-  if(const auto currentTimer = this->getTimer(this->currentTimerIndex))
-  {
-    this->disconnect(currentTimer);
-  }
-
   this->currentTimerIndex += 1;
 
   if(this->loop == true && this->currentTimerIndex >= static_cast<size_t>(this->size()))
   {
+    std::cout << "TimerPlayer: looping\n";
+
     this->currentTimerIndex = 0;
   }
 
-  if(const auto nextTimer = this->getTimer(this->currentTimerIndex))
+  if(this->currentTimerIndex <= static_cast<size_t>(this->size()))
   {
-    nextTimer->start();
-    this->connect(nextTimer, &tl::Timer::expired, this, &tl::TimerPlayer::startNextTimer);
+    std::cout << "TimerPlayer: Starting timer " << this->currentTimerIndex << " with duration "
+              << this->items[this->currentTimerIndex]->duration << "\n";
 
-    this->timerStarted(this->currentTimerIndex);
+    this->timer.setDuration(this->items[this->currentTimerIndex]->duration);
+    this->timer.start();
   }
   else
   {
+    std::cout << "TimerPlayer: stopping\n";
+
     this->currentTimerIndex = 0;
     this->done();
   }

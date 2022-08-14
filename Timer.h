@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QTime>
 #include <QTimer>
 
 namespace tl
@@ -12,29 +13,26 @@ namespace tl
     Timer(QObject* parent = nullptr);
     virtual ~Timer() = default;
 
-    void setTitle(const QString& x);
-    QString getTitle() const;
+    void setDuration(int x);
+    int getDuration() const;
 
     int getTimeRemaining() const;
 
     void setResolution(int x);
     int getResolution() const;
 
-    void setDuration(int x);
-    int getDuration() const;
-
     bool getIsPaused() const;
 
   public slots:
     void start();
     void pause();
+    void stop();
 
   signals:
     void expired();
 
   private:
     QTimer* timer{nullptr};
-    QString title;
 
     int duration{0};
     int timeRemaining{0};

@@ -1,18 +1,21 @@
 #include "Timer.h"
 
-tl::Timer::Timer(QObject* parent) : QObject(parent), timer(new QTimer(this)), duration(3000), timeRemaining(duration)
+#include <iostream>
+
+tl::Timer::Timer(QObject* parent) : QObject(parent), timer(new QTimer(this))
 {
   this->connect(this->timer, &QTimer::timeout, this, &tl::Timer::tick);
 }
 
-void tl::Timer::setTitle(const QString& x)
+void tl::Timer::setDuration(int x)
 {
-  this->title = x;
+  this->duration = x;
+  this->timeRemaining = x;
 }
 
-QString tl::Timer::getTitle() const
+int tl::Timer::getDuration() const
 {
-  return this->title;
+  return this->duration;
 }
 
 int tl::Timer::getTimeRemaining() const
@@ -28,17 +31,6 @@ void tl::Timer::setResolution(int x)
 int tl::Timer::getResolution() const
 {
   return this->resolution;
-}
-
-void tl::Timer::setDuration(int x)
-{
-  this->duration = x;
-  this->timeRemaining = x;
-}
-
-int tl::Timer::getDuration() const
-{
-  return this->duration;
 }
 
 bool tl::Timer::getIsPaused() const
@@ -58,16 +50,22 @@ void tl::Timer::pause()
   this->paused = true;
 }
 
+void tl::Timer::stop()
+{
+  this->timer->stop();
+}
+
 void tl::Timer::tick()
 {
   if(this->paused == false)
   {
-    this->timeRemaining = this->timeRemaining - this->resolution;
+    this->timeRemaining -= this->resolution;
 
     if(this->timeRemaining <= 0)
     {
       this->timeRemaining = 0;
       this->timer->stop();
+
       this->expired();
     }
     else

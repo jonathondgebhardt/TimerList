@@ -2,6 +2,7 @@
 
 #include "Timer.h"
 #include <QObject>
+#include <QTimer>
 #include <memory>
 #include <vector>
 
@@ -11,12 +12,19 @@ namespace tl
   {
     Q_OBJECT
   public:
+    struct Item
+    {
+      QString title;
+      int duration{0};
+      int timeRemaining{0};
+    };
+
     TimerPlayer(QObject* parent = nullptr);
     virtual ~TimerPlayer() = default;
 
     int size() const;
 
-    tl::Timer* getTimer(int x) const;
+    tl::TimerPlayer::Item* getItem(int x) const;
 
     bool getIsPaused() const;
 
@@ -35,7 +43,8 @@ namespace tl
     void done();
 
   private:
-    std::vector<std::unique_ptr<tl::Timer>> timers;
+    tl::Timer timer;
+    std::vector<std::unique_ptr<tl::TimerPlayer::Item>> items;
     size_t currentTimerIndex{0};
     bool loop{false};
 
