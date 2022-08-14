@@ -18,7 +18,6 @@ namespace tl
       NowPlaying = 0,
       Title,
       Duration,
-      TimeRemaining,
       Count
     };
 

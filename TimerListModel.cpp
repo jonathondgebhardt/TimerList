@@ -1,5 +1,8 @@
 #include "TimerListModel.h"
 
+#include "Utilities.h"
+#include <QTime>
+
 tl::TimerListModel::TimerListModel(QObject* parent) : QAbstractTableModel(parent), player(new tl::TimerPlayer(this))
 {
   this->connect(this->player, &tl::TimerPlayer::timerStarted, this, &tl::TimerListModel::timerChanged);
@@ -21,8 +24,6 @@ Qt::ItemFlags tl::TimerListModel::flags(const QModelIndex& index) const
     case tl::TimerListModel::Column::Title:
     case tl::TimerListModel::Column::Duration:
       flags |= Qt::ItemIsEditable;
-      break;
-    case tl::TimerListModel::Column::TimeRemaining:
       break;
     default:
       break;
@@ -52,9 +53,6 @@ QVariant tl::TimerListModel::headerData(int section, Qt::Orientation orientation
       case tl::TimerListModel::Column::Duration:
         header = "Duration";
         break;
-      case tl::TimerListModel::Column::TimeRemaining:
-        header = "Time Remaining";
-        break;
       default:
         break;
       }
@@ -77,7 +75,7 @@ QVariant tl::TimerListModel::data(const QModelIndex& index, int role) const
   {
     if(role == Qt::DisplayRole)
     {
-      if(const auto timer = this->player->getTimer(index.row()))
+      if(const auto item = this->player->getItem(index.row()))
       {
         const auto column = static_cast<tl::TimerListModel::Column>(index.column());
         switch(column)
@@ -86,13 +84,10 @@ QVariant tl::TimerListModel::data(const QModelIndex& index, int role) const
           data = (index.row() == this->currentTimer) ? "This" : "";
           break;
         case tl::TimerListModel::Column::Title:
-          data = timer->getTitle();
+          data = item->title;
           break;
         case tl::TimerListModel::Column::Duration:
-          data = QString::number(timer->getDuration());
-          break;
-        case tl::TimerListModel::Column::TimeRemaining:
-          data = QString::number(timer->getTimeRemaining());
+          data = tl::util::MsToTimeString(item->duration);
           break;
         default:
           break;
@@ -108,7 +103,7 @@ bool tl::TimerListModel::setData(const QModelIndex& index, const QVariant& value
 {
   if(index.isValid() == true)
   {
-    if(const auto timer = this->player->getTimer(index.row()))
+    if(const auto item = this->player->getItem(index.row()))
     {
       const auto column = static_cast<tl::TimerListModel::Column>(index.column());
       switch(column)
@@ -116,11 +111,11 @@ bool tl::TimerListModel::setData(const QModelIndex& index, const QVariant& value
       case tl::TimerListModel::Column::NowPlaying:
         break;
       case tl::TimerListModel::Column::Title:
-        timer->setTitle(value.toString());
+        item->title = value.toString();
         this->dataChanged(index, index, {Qt::EditRole});
         break;
       case tl::TimerListModel::Column::Duration:
-        timer->setDuration(value.toInt());
+        item->duration = value.toInt();
         this->dataChanged(index, index, {Qt::EditRole});
         break;
       default:
