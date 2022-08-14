@@ -3,10 +3,11 @@
 #include "TimerListModel.h"
 #include <QBoxLayout>
 
-tl::TimerListWidget::TimerListWidget(QWidget* parent)
+tl::TimerListWidget::TimerListWidget(tl::TimerPlayer* const player, QWidget* parent)
     : QWidget(parent),
       vTimerList(new tl::TimerListView(this)),
-      btnPlayPause(new QPushButton("Play", this)),
+      btnPlay(new QPushButton("Play", this)),
+      btnPause(new QPushButton("Pause", this)),
       btnStop(new QPushButton("Stop", this)),
       chkLoop(new QCheckBox("Loop", this)),
       btnAdd(new QPushButton("Add", this)),
@@ -14,7 +15,10 @@ tl::TimerListWidget::TimerListWidget(QWidget* parent)
 {
   const auto layout = new QHBoxLayout(this);
 
-  layout->addWidget(this->btnPlayPause);
+  layout->addWidget(this->btnPlay);
+
+  this->btnPause->setEnabled(false);
+  layout->addWidget(this->btnPause);
 
   this->btnStop->setEnabled(false);
   layout->addWidget(this->btnStop);
@@ -34,33 +38,74 @@ tl::TimerListWidget::TimerListWidget(QWidget* parent)
 
   layout->addLayout(buttonLayout);
 
-  this->connect(this->btnPlayPause, &QPushButton::clicked, this, &tl::TimerListWidget::playPause);
+  this->connect(this->btnPlay, &QPushButton::clicked, this, &tl::TimerListWidget::play);
+  this->connect(this->btnPause, &QPushButton::clicked, this, &tl::TimerListWidget::pause);
   this->connect(this->btnStop, &QPushButton::clicked, this, &tl::TimerListWidget::stop);
   this->connect(this->chkLoop, &QCheckBox::stateChanged, this, &tl::TimerListWidget::loopChanged);
-  this->connect(this->btnAdd, &QPushButton::clicked, this, &tl::TimerListWidget::addTimer);
-  this->connect(this->btnRemove, &QPushButton::clicked, this, &tl::TimerListWidget::removeTimer);
+  this->connect(this->btnAdd, &QPushButton::clicked, this, &tl::TimerListWidget::addItem);
+  this->connect(this->btnRemove, &QPushButton::clicked, this, &tl::TimerListWidget::removeItem);
+
+  this->setPlayer(player);
 }
 
-void tl::TimerListWidget::playPause()
+void tl::TimerListWidget::setPlayer(tl::TimerPlayer* const x)
 {
-  const auto model = qobject_cast<tl::TimerListModel*>(this->vTimerList->model());
-  model->playPause();
+  this->player = x;
+  this->connect(this->player, &tl::TimerPlayer::done, this, &tl::TimerListWidget::stop);
 
+  const auto model = qobject_cast<tl::TimerListModel*>(this->vTimerList->model());
+  model->setPlayer(x);
+}
+
+void tl::TimerListWidget::play()
+{
+
+  if(this->player != nullptr)
+  {
+    this->player->play();
+  }
+
+  this->btnPlay->setEnabled(false);
+  this->btnPause->setEnabled(true);
+  this->btnStop->setEnabled(true);
+}
+
+void tl::TimerListWidget::pause()
+{
+  if(this->player != nullptr)
+  {
+    this->player->pause();
+  }
+
+  this->btnPlay->setEnabled(true);
+  this->btnPause->setEnabled(false);
   this->btnStop->setEnabled(true);
 }
 
 void tl::TimerListWidget::stop()
 {
-  const auto model = qobject_cast<tl::TimerListModel*>(this->vTimerList->model());
-  model->stop();
+  if(this->player != nullptr)
+  {
+    this->player->stop();
+  }
 
+  this->btnPlay->setEnabled(true);
+  this->btnPause->setEnabled(false);
   this->btnStop->setEnabled(false);
 }
 
-void tl::TimerListWidget::addTimer()
+void tl::TimerListWidget::loopChanged(int x)
+{
+  if(this->player != nullptr)
+  {
+    this->player->setLoop(x == Qt::Checked);
+  }
+}
+
+void tl::TimerListWidget::addItem()
 {
   const auto model = qobject_cast<tl::TimerListModel*>(this->vTimerList->model());
-  const auto row = model->addTimer();
+  const auto row = model->addItem();
 
   const auto selectionModel = this->vTimerList->selectionModel();
   selectionModel->clearSelection();
@@ -69,12 +114,12 @@ void tl::TimerListWidget::addTimer()
   this->btnRemove->setEnabled(true);
 }
 
-void tl::TimerListWidget::removeTimer()
+void tl::TimerListWidget::removeItem()
 {
   const auto selectionModel = this->vTimerList->selectionModel();
   const auto removeIndex = selectionModel->currentIndex();
   const auto model = qobject_cast<tl::TimerListModel*>(this->vTimerList->model());
-  model->removeTimer(removeIndex);
+  model->removeItem(removeIndex);
   selectionModel->clearSelection();
 
   const auto selectIndex = model->index(removeIndex.row() - 1, 0);
@@ -84,10 +129,4 @@ void tl::TimerListWidget::removeTimer()
   }
 
   this->btnRemove->setEnabled(model->rowCount() > 0);
-}
-
-void tl::TimerListWidget::loopChanged(int x)
-{
-  const auto model = qobject_cast<tl::TimerListModel*>(this->vTimerList->model());
-  model->setLoop(x == Qt::Checked);
 }

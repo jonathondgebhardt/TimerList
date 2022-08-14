@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Timer.h"
 #include "TimerPlayer.h"
 #include <QAbstractTableModel>
 #include <memory>
@@ -32,16 +31,12 @@ namespace tl
     virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
   public slots:
-    void playPause();
-    void stop();
-    void pause();
-    int addTimer();
-    void removeTimer(const QModelIndex& index);
-    void timerChanged(int x);
-    void setLoop(bool x);
+    void setPlayer(tl::TimerPlayer* const x);
+
+    int addItem();
+    void removeItem(const QModelIndex& index);
 
   private:
     tl::TimerPlayer* player{nullptr};
-    int currentTimer{-1};
   };
 } // namespace tl

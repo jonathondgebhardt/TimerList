@@ -15,7 +15,7 @@ namespace tl
     struct Item
     {
       QString title;
-      int duration{0};
+      int duration{3000};
       int timeRemaining{0};
     };
 
@@ -33,8 +33,8 @@ namespace tl
     void pause();
     void stop();
 
-    void addTimer();
-    void removeTimer(int x);
+    void addItem();
+    void removeItem(int x);
 
     void setLoop(bool x);
 

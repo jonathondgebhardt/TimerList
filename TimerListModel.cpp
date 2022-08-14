@@ -3,9 +3,8 @@
 #include "Utilities.h"
 #include <QTime>
 
-tl::TimerListModel::TimerListModel(QObject* parent) : QAbstractTableModel(parent), player(new tl::TimerPlayer(this))
+tl::TimerListModel::TimerListModel(QObject* parent) : QAbstractTableModel(parent)
 {
-  this->connect(this->player, &tl::TimerPlayer::timerStarted, this, &tl::TimerListModel::timerChanged);
 }
 
 Qt::ItemFlags tl::TimerListModel::flags(const QModelIndex& index) const
@@ -71,17 +70,16 @@ QVariant tl::TimerListModel::data(const QModelIndex& index, int role) const
 {
   QVariant data;
 
-  if(index.isValid() == true)
+  if(index.isValid() == true && this->player != nullptr)
   {
-    if(role == Qt::DisplayRole)
+    if(const auto item = this->player->getItem(index.row()))
     {
-      if(const auto item = this->player->getItem(index.row()))
+      if(role == Qt::DisplayRole)
       {
         const auto column = static_cast<tl::TimerListModel::Column>(index.column());
         switch(column)
         {
         case tl::TimerListModel::Column::NowPlaying:
-          data = (index.row() == this->currentTimer) ? "This" : "";
           break;
         case tl::TimerListModel::Column::Title:
           data = item->title;
@@ -101,7 +99,7 @@ QVariant tl::TimerListModel::data(const QModelIndex& index, int role) const
 
 bool tl::TimerListModel::setData(const QModelIndex& index, const QVariant& value, int)
 {
-  if(index.isValid() == true)
+  if(index.isValid() == true && this->player != nullptr)
   {
     if(const auto item = this->player->getItem(index.row()))
     {
@@ -131,57 +129,43 @@ bool tl::TimerListModel::setData(const QModelIndex& index, const QVariant& value
 
 int tl::TimerListModel::rowCount(const QModelIndex&) const
 {
-  return this->player->size();
-}
-
-void tl::TimerListModel::playPause()
-{
-  if(this->player->getIsPaused() == true)
+  if(this->player != nullptr)
   {
-    this->player->play();
+    return this->player->size();
   }
-  else
+
+  return -1;
+}
+
+void tl::TimerListModel::setPlayer(tl::TimerPlayer* const x)
+{
+  this->player = x;
+}
+
+int tl::TimerListModel::addItem()
+{
+  auto row = -1;
+
+  if(this->player != nullptr)
   {
-    this->player->pause();
+    row = this->rowCount();
+    this->beginInsertRows(QModelIndex(), row, row);
+    this->player->addItem();
+    this->endInsertRows();
   }
-}
-
-void tl::TimerListModel::stop()
-{
-  this->player->stop();
-}
-
-void tl::TimerListModel::pause()
-{
-  this->player->pause();
-}
-
-int tl::TimerListModel::addTimer()
-{
-  const auto row = this->rowCount();
-  this->beginInsertRows(QModelIndex(), row, row);
-  this->player->addTimer();
-  this->endInsertRows();
 
   return row;
 }
 
-void tl::TimerListModel::removeTimer(const QModelIndex& index)
+void tl::TimerListModel::removeItem(const QModelIndex& index)
 {
-  if(index.isValid() == true && index.row() >= 0 && index.row() < this->player->size())
+  if(this->player != nullptr)
   {
-    this->beginRemoveRows(QModelIndex(), index.row(), index.row());
-    this->player->removeTimer(index.row());
-    this->endRemoveRows();
+    if(index.isValid() == true && index.row() >= 0 && index.row() < this->player->size())
+    {
+      this->beginRemoveRows(QModelIndex(), index.row(), index.row());
+      this->player->removeItem(index.row());
+      this->endRemoveRows();
+    }
   }
-}
-
-void tl::TimerListModel::timerChanged(int x)
-{
-  this->currentTimer = x;
-}
-
-void tl::TimerListModel::setLoop(bool x)
-{
-  this->player->setLoop(x);
 }

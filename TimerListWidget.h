@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TimerListView.h"
+#include "TimerPlayer.h"
 #include <QCheckBox>
 #include <QPushButton>
 #include <QWidget>
@@ -11,22 +12,29 @@ namespace tl
   {
     Q_OBJECT
   public:
-    TimerListWidget(QWidget* parent = nullptr);
+    TimerListWidget(tl::TimerPlayer* const player, QWidget* parent = nullptr);
     virtual ~TimerListWidget() = default;
 
+  public slots:
+    void setPlayer(tl::TimerPlayer* const x);
+
   private:
+    tl::TimerPlayer* player{nullptr};
+
     tl::TimerListView* vTimerList{nullptr};
-    QPushButton* btnPlayPause{nullptr};
+    QPushButton* btnPlay{nullptr};
+    QPushButton* btnPause{nullptr};
     QPushButton* btnStop{nullptr};
     QCheckBox* chkLoop{nullptr};
     QPushButton* btnAdd{nullptr};
     QPushButton* btnRemove{nullptr};
 
   private slots:
-    void playPause();
+    void play();
+    void pause();
     void stop();
-    void addTimer();
-    void removeTimer();
     void loopChanged(int x);
+    void addItem();
+    void removeItem();
   };
 } // namespace tl

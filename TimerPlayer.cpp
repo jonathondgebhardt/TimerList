@@ -47,14 +47,18 @@ void tl::TimerPlayer::pause()
 
 void tl::TimerPlayer::stop()
 {
-  this->timer.pause();
+  this->timer.stop();
+
+  this->currentTimerIndex = 0;
+  this->timer.setDuration(0);
 }
 
-void tl::TimerPlayer::addTimer()
+void tl::TimerPlayer::addItem()
 {
+  this->items.push_back(std::make_unique<tl::TimerPlayer::Item>());
 }
 
-void tl::TimerPlayer::removeTimer(int)
+void tl::TimerPlayer::removeItem(int)
 {
 }
 
@@ -74,7 +78,7 @@ void tl::TimerPlayer::startNextTimer()
     this->currentTimerIndex = 0;
   }
 
-  if(this->currentTimerIndex <= static_cast<size_t>(this->size()))
+  if(this->currentTimerIndex < static_cast<size_t>(this->size()))
   {
     std::cout << "TimerPlayer: Starting timer " << this->currentTimerIndex << " with duration "
               << this->items[this->currentTimerIndex]->duration << "\n";
