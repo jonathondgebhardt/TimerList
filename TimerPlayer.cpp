@@ -103,6 +103,7 @@ void tl::TimerPlayer::startNextTimer()
     if(this->progressBar != nullptr)
     {
       this->progressBar->setRange(0, duration);
+      this->progressBar->setValue(0);
     }
 
     this->timer.setDuration(duration);
