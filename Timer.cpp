@@ -38,6 +38,11 @@ bool tl::Timer::getIsPaused() const
   return this->paused;
 }
 
+void tl::Timer::setProgressBar(QProgressBar* const x)
+{
+  this->progressBar = x;
+}
+
 void tl::Timer::start()
 {
   this->paused = false;
@@ -60,6 +65,11 @@ void tl::Timer::tick()
   if(this->paused == false)
   {
     this->timeRemaining -= this->resolution;
+
+    if(this->progressBar != nullptr)
+    {
+      this->progressBar->setValue(this->duration - this->timeRemaining);
+    }
 
     if(this->timeRemaining <= 0)
     {

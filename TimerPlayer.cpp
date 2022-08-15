@@ -1,7 +1,5 @@
 #include "TimerPlayer.h"
 
-#include <iostream>
-
 tl::TimerPlayer::TimerPlayer(QObject* parent) : QObject(parent)
 {
   this->connect(&this->timer, &tl::Timer::expired, this, &tl::TimerPlayer::startNextTimer);
@@ -22,21 +20,37 @@ tl::TimerPlayer::Item* tl::TimerPlayer::getItem(int x) const
   return nullptr;
 }
 
+tl::TimerPlayer::Item* tl::TimerPlayer::getCurrentItem() const
+{
+  return this->getItem(this->currentTimerIndex);
+}
+
 bool tl::TimerPlayer::getIsPaused() const
 {
-
   return false;
+}
+
+void tl::TimerPlayer::setProgressBar(QProgressBar* const x)
+{
+  this->progressBar = x;
+  this->timer.setProgressBar(x);
 }
 
 void tl::TimerPlayer::play()
 {
   if(this->items.empty() == false)
   {
-    std::cout << "TimerPlayer: Starting timer " << this->currentTimerIndex << " with duration "
-              << this->items[this->currentTimerIndex]->duration << "\n";
+    const auto duration = this->items[this->currentTimerIndex]->duration;
 
-    this->timer.setDuration(this->items[this->currentTimerIndex]->duration);
+    if(this->progressBar != nullptr)
+    {
+      this->progressBar->setRange(0, duration);
+    }
+
+    this->timer.setDuration(duration);
     this->timer.start();
+
+    this->timerStarted(this->currentTimerIndex);
   }
 }
 
@@ -49,6 +63,11 @@ void tl::TimerPlayer::stop()
 {
   this->timer.stop();
 
+  if(this->progressBar != nullptr)
+  {
+    this->progressBar->reset();
+  }
+
   this->currentTimerIndex = 0;
   this->timer.setDuration(0);
 }
@@ -58,8 +77,9 @@ void tl::TimerPlayer::addItem()
   this->items.push_back(std::make_unique<tl::TimerPlayer::Item>());
 }
 
-void tl::TimerPlayer::removeItem(int)
+void tl::TimerPlayer::removeItem(int x)
 {
+  this->items.erase(std::begin(this->items) + x);
 }
 
 void tl::TimerPlayer::setLoop(bool x)
@@ -73,23 +93,25 @@ void tl::TimerPlayer::startNextTimer()
 
   if(this->loop == true && this->currentTimerIndex >= static_cast<size_t>(this->size()))
   {
-    std::cout << "TimerPlayer: looping\n";
-
     this->currentTimerIndex = 0;
   }
 
   if(this->currentTimerIndex < static_cast<size_t>(this->size()))
   {
-    std::cout << "TimerPlayer: Starting timer " << this->currentTimerIndex << " with duration "
-              << this->items[this->currentTimerIndex]->duration << "\n";
+    const auto duration = this->items[this->currentTimerIndex]->duration;
 
-    this->timer.setDuration(this->items[this->currentTimerIndex]->duration);
+    if(this->progressBar != nullptr)
+    {
+      this->progressBar->setRange(0, duration);
+    }
+
+    this->timer.setDuration(duration);
     this->timer.start();
+
+    this->timerStarted(this->currentTimerIndex);
   }
   else
   {
-    std::cout << "TimerPlayer: stopping\n";
-
     this->currentTimerIndex = 0;
     this->done();
   }

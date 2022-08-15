@@ -2,6 +2,7 @@
 
 #include "Timer.h"
 #include <QObject>
+#include <QProgressBar>
 #include <QTimer>
 #include <memory>
 #include <vector>
@@ -25,8 +26,11 @@ namespace tl
     int size() const;
 
     tl::TimerPlayer::Item* getItem(int x) const;
+    tl::TimerPlayer::Item* getCurrentItem() const;
 
     bool getIsPaused() const;
+
+    void setProgressBar(QProgressBar* const x);
 
   public slots:
     void play();
@@ -44,6 +48,7 @@ namespace tl
 
   private:
     tl::Timer timer;
+    QProgressBar* progressBar;
     std::vector<std::unique_ptr<tl::TimerPlayer::Item>> items;
     size_t currentTimerIndex{0};
     bool loop{false};

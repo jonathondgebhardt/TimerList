@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QProgressBar>
 #include <QTime>
 #include <QTimer>
 
@@ -23,6 +24,8 @@ namespace tl
 
     bool getIsPaused() const;
 
+    void setProgressBar(QProgressBar* const x);
+
   public slots:
     void start();
     void pause();
@@ -33,6 +36,7 @@ namespace tl
 
   private:
     QTimer* timer{nullptr};
+    QProgressBar* progressBar{nullptr};
 
     int duration{0};
     int timeRemaining{0};

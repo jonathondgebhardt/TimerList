@@ -11,7 +11,10 @@ tl::TimerListWidget::TimerListWidget(tl::TimerPlayer* const player, QWidget* par
       btnStop(new QPushButton("Stop", this)),
       chkLoop(new QCheckBox("Loop", this)),
       btnAdd(new QPushButton("Add", this)),
-      btnRemove(new QPushButton("Remove", this))
+      btnRemove(new QPushButton("Remove", this)),
+      statusBar(new QStatusBar(this)),
+      lblStatus(new QLabel("Stopped")),
+      progressBar(new QProgressBar(this))
 {
   const auto parentLayout = new QVBoxLayout(this);
 
@@ -48,6 +51,18 @@ tl::TimerListWidget::TimerListWidget(tl::TimerPlayer* const player, QWidget* par
     hLayout->addLayout(buttonLayout);
   }
 
+  {
+    const auto hLayout = new QHBoxLayout();
+    parentLayout->addLayout(hLayout);
+
+    this->statusBar->setSizeGripEnabled(false);
+    this->statusBar->addWidget(this->lblStatus);
+    this->statusBar->setStyleSheet("border: 0px; background-color: #19232D;");
+    hLayout->addWidget(this->statusBar);
+
+    hLayout->addWidget(this->progressBar);
+  }
+
   this->connect(this->btnPlay, &QPushButton::clicked, this, &tl::TimerListWidget::play);
   this->connect(this->btnPause, &QPushButton::clicked, this, &tl::TimerListWidget::pause);
   this->connect(this->btnStop, &QPushButton::clicked, this, &tl::TimerListWidget::stop);
@@ -66,6 +81,9 @@ void tl::TimerListWidget::setPlayer(tl::TimerPlayer* const x)
   {
     this->player->setLoop(this->chkLoop->isChecked());
     this->connect(this->player, &tl::TimerPlayer::done, this, &tl::TimerListWidget::stop);
+    this->connect(this->player, &tl::TimerPlayer::timerStarted, this, &tl::TimerListWidget::timerChanged);
+
+    this->player->setProgressBar(this->progressBar);
   }
 
   const auto model = qobject_cast<tl::TimerListModel*>(this->vTimerList->model());
@@ -74,10 +92,14 @@ void tl::TimerListWidget::setPlayer(tl::TimerPlayer* const x)
 
 void tl::TimerListWidget::play()
 {
-
   if(this->player != nullptr)
   {
     this->player->play();
+
+    if(const auto item = this->player->getCurrentItem())
+    {
+      this->lblStatus->setText(item->title);
+    }
   }
 
   this->btnPlay->setEnabled(false);
@@ -95,6 +117,8 @@ void tl::TimerListWidget::pause()
   this->btnPlay->setEnabled(true);
   this->btnPause->setEnabled(false);
   this->btnStop->setEnabled(true);
+
+  this->lblStatus->setText("Paused");
 }
 
 void tl::TimerListWidget::stop()
@@ -107,6 +131,8 @@ void tl::TimerListWidget::stop()
   this->btnPlay->setEnabled(true);
   this->btnPause->setEnabled(false);
   this->btnStop->setEnabled(false);
+
+  this->lblStatus->setText("Stopped");
 }
 
 void tl::TimerListWidget::loopChanged(int x)
@@ -144,4 +170,12 @@ void tl::TimerListWidget::removeItem()
   }
 
   this->btnRemove->setEnabled(model->rowCount() > 0);
+}
+
+void tl::TimerListWidget::timerChanged(int x)
+{
+  if(const auto item = this->player->getItem(x))
+  {
+    this->lblStatus->setText(item->title);
+  }
 }

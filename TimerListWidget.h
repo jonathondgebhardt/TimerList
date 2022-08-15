@@ -3,7 +3,10 @@
 #include "TimerListView.h"
 #include "TimerPlayer.h"
 #include <QCheckBox>
+#include <QLabel>
+#include <QProgressBar>
 #include <QPushButton>
+#include <QStatusBar>
 #include <QWidget>
 
 namespace tl
@@ -29,6 +32,11 @@ namespace tl
     QPushButton* btnAdd{nullptr};
     QPushButton* btnRemove{nullptr};
 
+    QStatusBar* statusBar{nullptr};
+    QLabel* lblStatus{nullptr};
+
+    QProgressBar* progressBar{nullptr};
+
   private slots:
     void play();
     void pause();
@@ -36,5 +44,6 @@ namespace tl
     void loopChanged(int x);
     void addItem();
     void removeItem();
+    void timerChanged(int x);
   };
 } // namespace tl
