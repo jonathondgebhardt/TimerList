@@ -1,7 +1,7 @@
 #include "TimerListModel.h"
 
 #include "Utilities.h"
-#include <QTime>
+#include <QIcon>
 
 tl::TimerListModel::TimerListModel(QObject* parent) : QAbstractTableModel(parent)
 {
@@ -74,9 +74,10 @@ QVariant tl::TimerListModel::data(const QModelIndex& index, int role) const
   {
     if(const auto item = this->player->getItem(index.row()))
     {
+      const auto column = static_cast<tl::TimerListModel::Column>(index.column());
+
       if(role == Qt::DisplayRole)
       {
-        const auto column = static_cast<tl::TimerListModel::Column>(index.column());
         switch(column)
         {
         case tl::TimerListModel::Column::NowPlaying:
@@ -85,7 +86,7 @@ QVariant tl::TimerListModel::data(const QModelIndex& index, int role) const
           data = item->title;
           break;
         case tl::TimerListModel::Column::Duration:
-          data = tl::util::MsToTimeString(item->duration);
+          data = tl::util::MsToQTime(item->duration);
           break;
         default:
           break;

@@ -10,6 +10,7 @@ DESTDIR = bin
 
 HEADERS += \
     FormMain.h \
+    TimeEditDelegate.h \
     Timer.h \
     TimerListModel.h \
     TimerListView.h \
